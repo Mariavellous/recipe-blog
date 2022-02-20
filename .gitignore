@@ -1,0 +1,10 @@
+.idea/
+posts.db
+poetry.lock
+pyproject.toml
+requirements.txt
+static/css
+static/js
+static/scss
+static/vendor
+templates

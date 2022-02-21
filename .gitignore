@@ -3,6 +3,7 @@ posts.db
 poetry.lock
 pyproject.toml
 requirements.txt
+.DS_Store
 static/css
 static/js
 static/scss

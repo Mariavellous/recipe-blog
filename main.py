@@ -1,10 +1,12 @@
-from flask import Flask, render_template, redirect, url_for, jsonify, request
+from flask import Flask, render_template, redirect, url_for, jsonify, request, send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
+from flask_cors import CORS
+
 import datetime
 
 
@@ -12,7 +14,8 @@ import datetime
 # import requests
 # posts = requests.get("https://api.npoint.io/43644ec4f0013682fc0d").json()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='recipe-app/build', static_url_path="/")
+CORS(app)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['DEBUG'] = True
 ckeditor = CKEditor(app)
@@ -55,8 +58,7 @@ class CreatePostForm(FlaskForm):
     submit = SubmitField("Submit Post")
 
 
-
-@app.route('/')
+@app.route('/api')
 def get_all_posts():
     posts = BlogPost.query.all()
     all_posts = []
@@ -65,14 +67,14 @@ def get_all_posts():
     return jsonify(all_posts)
 
 
-@app.route("/post/<int:post_id>")
+@app.route("/api/post/<int:post_id>")
 def show_post(post_id):
     post = BlogPost.query.get(post_id)
     requested_post = post.to_dict()
     return jsonify(requested_post)
 
 
-@app.route("/new-post", methods=['POST'])
+@app.route("/api/new-post", methods=['POST'])
 def new_post():
     my_post = BlogPost()
     my_post.title = request.form["title"]
@@ -86,14 +88,14 @@ def new_post():
     return jsonify(my_post.to_dict())
 
 
-@app.route("/edit-post/<int:post_id>", methods=['PUT'])
+@app.route("/api/edit-post/<int:post_id>", methods=['PUT'])
 def edit_post(post_id):
     edit_this_post = BlogPost.query.get(post_id)
     edit_this_post.body = request.form["body"]
     db.session.commit()
     return jsonify(edit_this_post.to_dict())
 
-@app.route("/delete/<int:post_id>", methods=['DELETE'])
+@app.route("/api/delete/<int:post_id>", methods=['DELETE'])
 def delete_post(post_id):
     delete_post = BlogPost.query.get(post_id)
     db.session.delete(delete_post)
@@ -110,5 +112,13 @@ def about():
 def contact():
     return render_template("contact.html")
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    if not path:
+        path = "index.html"
+
+    return app.send_static_file("index.html")
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5002)

@@ -6,6 +6,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 import datetime
+import requests
 
 
 ## Delete this code:
@@ -13,9 +14,10 @@ import datetime
 # posts = requests.get("https://api.npoint.io/43644ec4f0013682fc0d").json()
 
 app = Flask(__name__)
-ckeditor = CKEditor(app)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['DEBUG'] = True
+app.config['CKEDITOR_PKG_TYPE'] = 'standard'
+ckeditor = CKEditor(app)
 Bootstrap(app)
 
 ##CONNECT TO DB
@@ -49,12 +51,22 @@ class BlogPost(db.Model):
 class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
     subtitle = StringField("Subtitle", validators=[DataRequired()])
-    author = StringField("Your Name", validators=[DataRequired()])
+    author = StringField("Author", validators=[DataRequired()])
     img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
     #body = StringField("Blog Content", validators=[DataRequired()])
     body = CKEditorField("Body")
     submit = SubmitField("Submit Post")
 
+
+def make_new_post(form, post_id):
+    post = BlogPost() if post_id is None else BlogPost.query.get(post_id)
+    post.title = form.title.data
+    post.subtitle = form.subtitle.data
+    post.body = form.body.data
+    post.author = form.author.data
+    post.img_url = form.img_url.data
+    post.date = datetime.datetime.today().strftime("%B %d, %Y")
+    return post
 
 @app.route('/')
 def get_all_posts():
@@ -73,28 +85,33 @@ def show_post(post_id):
     return render_template("post.html", post=post)
 
 
-@app.route("/new-post", methods=['POST'])
+@app.route("/new-post", methods=['GET', 'POST'])
 def new_post():
-    my_post = BlogPost()
-    my_post.title = request.form["title"]
-    my_post.subtitle = request.form["subtitle"]
-    my_post.date = datetime.datetime.today()
-    my_post.body = request.form["body"]
-    my_post.author = request.form["author"]
-    my_post.img_url = request.form["img_url"]
-    db.session.add(my_post)
-    db.session.commit()
-    # return jsonify(my_post.to_dict())
-    return render_template("make-post.html")
-
-
-@app.route("/edit-post/<int:post_id>", methods=['GET'])
-def edit_post(post_id):
-    if request.get == "GET":
-        edit_this_post = BlogPost.query.get(post_id)
-        edit_this_post.body = request.form["body"]
+    # db.session.add(my_post)
+    # db.session.commit()
+    form = CreatePostForm()
+    if form.validate_on_submit():
+        post = make_new_post(form, post_id=None)
+        db.session.add(post)
         db.session.commit()
-        return render_template("post.html", post=edit_this_post)
+        return redirect(url_for('get_all_posts'))
+    return render_template("make-post.html", form=form)
+
+
+@app.route("/edit-post/<int:post_id>", methods=['GET', 'POST'])
+def edit_post(post_id):
+    if request.method == "GET":
+        post = BlogPost.query.get(post_id)
+        form = CreatePostForm()
+        form.title.data = post.title
+        form.subtitle.data = post.subtitle
+        form.author.data = post.author
+        form.img_url.data = post.img_url
+        form.body.data = post.body
+        return render_template("make-post.html", form=form)
+    post = make_new_post(CreatePostForm(),post_id)
+    db.session.commit()
+    return redirect(url_for("show_post", post_id=post_id))
 
 @app.route("/delete/<int:post_id>", methods=['GET'])
 def delete_post(post_id):
@@ -113,14 +130,6 @@ def about():
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
-
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    if not path:
-        path = "index.html"
-
-    return app.send_static_file("index.html")
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5002)

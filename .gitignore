@@ -4,3 +4,4 @@ pyproject.toml
 requirements.txt
 .DS_Store
 /venv/
+.env

@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, redirect, url_for, jsonify, request, send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
@@ -6,7 +7,11 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 import datetime
-import requests
+
+# Load secrets from .env if present, if not load them from the environment
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 ## Delete this code:
@@ -14,15 +19,16 @@ import requests
 # posts = requests.get("https://api.npoint.io/43644ec4f0013682fc0d").json()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ["RECIPES_SECRET_KEY"]
 app.config['DEBUG'] = True
 app.config['CKEDITOR_PKG_TYPE'] = 'standard'
 ckeditor = CKEditor(app)
 Bootstrap(app)
 
 ##CONNECT TO DB
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["RECIPES_DATABASE_URL"]
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_ECHO"] = True
 db = SQLAlchemy(app)
 
 ##CONFIGURE TABLE
@@ -46,6 +52,9 @@ class BlogPost(db.Model):
             "img_url": self.img_url,
         }
 
+# Create the tables if they don't exist
+db.create_all()
+db.session.commit()
 
 ##WTForm
 class CreatePostForm(FlaskForm):

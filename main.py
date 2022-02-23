@@ -118,6 +118,7 @@ def new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
         post = make_new_post(form, post_id=None)
+        post.user_id = current_user.id
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('get_all_posts'))

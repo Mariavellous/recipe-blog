@@ -3,9 +3,13 @@ from flask import Flask, render_template, redirect, url_for, jsonify, request, s
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
+from sqlalchemy import TIMESTAMP
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+
 import datetime
 
 # Load secrets from .env if present, if not load them from the environment
@@ -13,10 +17,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-
-## Delete this code:
-# import requests
-# posts = requests.get("https://api.npoint.io/43644ec4f0013682fc0d").json()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ["RECIPES_SECRET_KEY"]
@@ -31,26 +31,40 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SQLALCHEMY_ECHO"] = True
 db = SQLAlchemy(app)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Create a comment table in DB
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    # date = db.Column(db., nullable=False)
+    date = db.Column(db.TIMESTAMP(timezone=False), nullable=False, default=datetime.datetime.now())
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"))
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"))
+
+
+##CREATE TABLE IN DB
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(1000))
+#Line below only required once, when creating DB.
+# db.create_all()
+
+
 ##CONFIGURE TABLE
-class BlogPost(db.Model):
+class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(250), unique=True, nullable=False)
-    subtitle = db.Column(db.String(250), nullable=False)
-    date = db.Column(db.String(250), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(250), nullable=False)
+    ingredients = db.Column(db.String(250), nullable=False)
+    date = db.Column(db.TIMESTAMP(timezone=False), nullable=False, default=datetime.datetime.now())
+    instructions = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"))
     img_url = db.Column(db.String(250), nullable=False)
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "subtitle": self.subtitle,
-            "date": self.date,
-            "body": self.body,
-            "author": self.author,
-            "img_url": self.img_url,
-        }
+
 
 # Create the tables if they don't exist
 db.create_all()
@@ -58,46 +72,49 @@ db.session.commit()
 
 ##WTForm
 class CreatePostForm(FlaskForm):
-    title = StringField("Blog Post Title", validators=[DataRequired()])
-    subtitle = StringField("Subtitle", validators=[DataRequired()])
-    author = StringField("Author", validators=[DataRequired()])
-    img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
-    #body = StringField("Blog Content", validators=[DataRequired()])
-    body = CKEditorField("Body")
+    title = StringField("Recipe Title", validators=[DataRequired()])
+    ingredients = StringField("Ingredients", validators=[DataRequired()])
+    img_url = StringField("Recipe Image URL", validators=[DataRequired(), URL()])
+    instructions = CKEditorField("Body")
     submit = SubmitField("Submit Post")
 
 
 def make_new_post(form, post_id):
-    post = BlogPost() if post_id is None else BlogPost.query.get(post_id)
+    post = Recipe() if post_id is None else Recipe.query.get(post_id)
     post.title = form.title.data
-    post.subtitle = form.subtitle.data
-    post.body = form.body.data
-    post.author = form.author.data
+    post.ingredients = form.ingredients.data
+    post.instructions = form.instructions.data
     post.img_url = form.img_url.data
-    post.date = datetime.datetime.today().strftime("%B %d, %Y")
     return post
 
 @app.route('/')
 def get_all_posts():
-    posts = BlogPost.query.all()
-    all_posts = []
-    for post in posts:
-        all_posts.append(post.to_dict())
+    posts = Recipe.query.all()
     return render_template("index.html", all_posts=posts)
 
 
 @app.route("/post/<int:post_id>")
 def show_post(post_id):
-    post = BlogPost.query.get(post_id)
-    requested_post = post.to_dict()
-    #return jsonify(requested_post)
-    return render_template("post.html", post=post)
+    post = Recipe.query.get(post_id)
+    comments = Comment.query.filter(Comment.recipe_id == post_id).all()
+    return render_template("post.html", post=post, comments=comments)
+
+@app.route("/post/<int:post_id>/comment", methods=["POST"])
+@login_required
+def create_comment(post_id):
+    new_comment = Comment()
+    new_comment.recipe_id = post_id
+    new_comment.user_id = current_user.id
+    new_comment.body = request.form.get("textarea")
+    db.session.add(new_comment)
+    db.session.commit()
+    return redirect(url_for("show_post", post_id=post_id))
+
+
 
 
 @app.route("/new-post", methods=['GET', 'POST'])
 def new_post():
-    # db.session.add(my_post)
-    # db.session.commit()
     form = CreatePostForm()
     if form.validate_on_submit():
         post = make_new_post(form, post_id=None)
@@ -110,25 +127,24 @@ def new_post():
 @app.route("/edit-post/<int:post_id>", methods=['GET', 'POST'])
 def edit_post(post_id):
     if request.method == "GET":
-        post = BlogPost.query.get(post_id)
+        post = Recipe.query.get(post_id)
         form = CreatePostForm()
         form.title.data = post.title
-        form.subtitle.data = post.subtitle
-        form.author.data = post.author
+        form.ingredients.data = post.ingredients
         form.img_url.data = post.img_url
-        form.body.data = post.body
+        form.instructions.data = post.instructions
         return render_template("make-post.html", form=form)
-    post = make_new_post(CreatePostForm(),post_id)
+    make_new_post(CreatePostForm(), post_id)
     db.session.commit()
     return redirect(url_for("show_post", post_id=post_id))
 
 @app.route("/delete/<int:post_id>", methods=['GET'])
 def delete_post(post_id):
-    delete_this_post = BlogPost.query.get(post_id)
+    delete_this_post = Recipe.query.get(post_id)
     db.session.delete(delete_this_post)
     db.session.commit()
-    # return jsonify(delete_post.to_dict())
     return redirect(url_for('get_all_posts'))
+
 
 
 @app.route("/about")
@@ -139,6 +155,57 @@ def about():
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
+
+
+
+
+### Register and Login Users
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == "GET":
+        return render_template("register.html")
+    else:
+        new_user = User()
+        new_user.name = request.form.get('name')
+        password = str(request.form.get('password'))
+        new_user.password = generate_password_hash(password=password, method='pbkdf2:sha256', salt_length=8)
+        new_user.email = request.form.get('email')
+
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for("login"))
+
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+    else:
+        email = request.form.get('email')
+        password = str(request.form.get('password'))
+        user = User.query.filter(User.email == email).first()
+        if check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for("get_all_posts"))
+        else:
+            return render_template("login.html")
+
+
+
+@app.route('/logout')
+def logout():
+    pass
+
+# Link to Download File directs to this route.
+@app.route('/download/<path:filename>')
+@login_required
+def download(filename):
+    return send_from_directory(directory='static', filename=filename)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5002)

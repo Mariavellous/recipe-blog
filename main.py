@@ -153,13 +153,6 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/contact")
-def contact():
-    return render_template("contact.html")
-
-
-
-
 ### Register and Login Users
 
 @login_manager.user_loader
@@ -195,17 +188,11 @@ def login():
         else:
             return render_template("login.html")
 
-
-
+# User Logout
 @app.route('/logout')
 def logout():
-    pass
-
-# Link to Download File directs to this route.
-@app.route('/download/<path:filename>')
-@login_required
-def download(filename):
-    return send_from_directory(directory='static', filename=filename)
+    logout_user()
+    return redirect(url_for("get_all_posts"))
 
 
 if __name__ == "__main__":

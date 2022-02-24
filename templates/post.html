@@ -10,7 +10,7 @@
 					<h1>{{post.title}}</h1>
 					<h2 class="subheading">{{post.subtitle}}</h2>
 					<span class="meta">Posted by
-              <a href="#">{{post.user_id.name}}</a>
+              <a href="#">{{ author.name }}</a>
               on {{post.date.strftime("%B %d, %Y")}}</span>
           </div>
         </div>
@@ -27,8 +27,8 @@
             {{post.instructions|safe}}
           </p>
             <h3>Comments</h3>
-            {% for comment in comments %}
-            <p> {{ comment.body }} by: ____  on {{ comment.date.strftime("%B %d, %Y") }} </p>
+            {% for comment in list_of_comments %}
+            <p> {{ comment["body"] }} by: {{ comment["user"].name }}  on {{ comment["date"].strftime("%B %d, %Y") }} </p>
 
             {% endfor %}
             <form action="/post/{{ post.id}}/comment" method="POST">

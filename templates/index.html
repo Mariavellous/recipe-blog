@@ -31,7 +31,7 @@
                     </a>
                     <p class="post-meta">Posted by
                         <a href="#">{{ author }}</a>
-                        on {{ post.date }}</p>
+                        on {{ post.date.strftime("%B %d, %Y") }}</p>
                 </div>
                 <hr>
             {% endfor %}

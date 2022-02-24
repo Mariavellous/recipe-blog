@@ -93,7 +93,16 @@ def get_all_posts():
 def show_post(post_id):
     post = Recipe.query.get(post_id)
     comments = Comment.query.filter(Comment.recipe_id == post_id).all()
-    return render_template("post.html", post=post, comments=comments)
+    author = User.query.filter(User.id == post.user_id).first()
+    list_of_comments = []
+    for comment in comments:
+        comment_info = {
+            "body": comment.body,
+            "date": comment.date,
+            "user": User.query.filter(User.id == comment.user_id).first()
+        }
+        list_of_comments.append(comment_info)
+    return render_template("post.html", post=post, author=author, list_of_comments=list_of_comments)
 
 @app.route("/post/<int:post_id>/comment", methods=["POST"])
 @login_required

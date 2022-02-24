@@ -11,7 +11,7 @@
 					<h2 class="subheading">{{post.subtitle}}</h2>
 					<span class="meta">Posted by
               <a href="#">{{post.user_id.name}}</a>
-              on {{post.date}}</span>
+              on {{post.date.strftime("%B %d, %Y")}}</span>
           </div>
         </div>
       </div>
@@ -28,10 +28,11 @@
           </p>
             <h3>Comments</h3>
             {% for comment in comments %}
-            <p> {{ comment.body }} </p>
+            <p> {{ comment.body }} by: ____  on {{ comment.date.strftime("%B %d, %Y") }} </p>
+
             {% endfor %}
             <form action="/post/{{ post.id}}/comment" method="POST">
-                <textarea rows="5" cols="20" name="textarea">Did you like the recipe?</textarea><input type="submit"/>
+                <textarea rows="5" cols="20" name="textarea"></textarea><input type="submit"/>
             </form>
             </p>
            <hr>

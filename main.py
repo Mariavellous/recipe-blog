@@ -86,25 +86,21 @@ def make_new_post(form, post_id):
 @app.route('/')
 def get_all_posts():
     posts = Recipe.query.all()
+    for post in posts:
+        post.user = User.query.filter(User.id == post.user_id).first()
     return render_template("index.html", all_posts=posts)
 
 
-@app.route("/post/<int:post_id>")
+@app.route("/recipes/<int:post_id>")
 def show_post(post_id):
     post = Recipe.query.get(post_id)
     comments = Comment.query.filter(Comment.recipe_id == post_id).all()
     author = User.query.filter(User.id == post.user_id).first()
-    list_of_comments = []
     for comment in comments:
-        comment_info = {
-            "body": comment.body,
-            "date": comment.date,
-            "user": User.query.filter(User.id == comment.user_id).first()
-        }
-        list_of_comments.append(comment_info)
-    return render_template("post.html", post=post, author=author, list_of_comments=list_of_comments)
+        comment.user = User.query.filter(User.id == comment.user_id).first()
+    return render_template("post.html", post=post, author=author, comments=comments)
 
-@app.route("/post/<int:post_id>/comment", methods=["POST"])
+@app.route("/recipes/<int:post_id>/comment", methods=["POST"])
 @login_required
 def create_comment(post_id):
     new_comment = Comment()
@@ -118,7 +114,7 @@ def create_comment(post_id):
 
 
 
-@app.route("/new-post", methods=['GET', 'POST'])
+@app.route("/recipes/new", methods=['GET', 'POST'])
 def new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -130,7 +126,7 @@ def new_post():
     return render_template("make-post.html", form=form)
 
 
-@app.route("/edit-post/<int:post_id>", methods=['GET', 'POST'])
+@app.route("/recipes/<int:post_id>/edit", methods=['GET', 'POST'])
 def edit_post(post_id):
     if request.method == "GET":
         post = Recipe.query.get(post_id)
@@ -144,7 +140,7 @@ def edit_post(post_id):
     db.session.commit()
     return redirect(url_for("show_post", post_id=post_id))
 
-@app.route("/delete/<int:post_id>", methods=['GET'])
+@app.route("/recipes/<int:post_id>/delete", methods=['GET'])
 def delete_post(post_id):
     delete_this_post = Recipe.query.get(post_id)
     db.session.delete(delete_this_post)

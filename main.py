@@ -38,21 +38,17 @@ login_manager.init_app(app)
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text, nullable=False)
-    # date = db.Column(db., nullable=False)
     date = db.Column(db.TIMESTAMP(timezone=False), nullable=False, default=datetime.datetime.now())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"))
-    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey('recipe.id', ondelete="CASCADE"), nullable=False)
 
 
 ##CREATE TABLE IN DB
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
-#Line below only required once, when creating DB.
-# db.create_all()
-
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(1000), nullable=False)
 
 ##CONFIGURE TABLE
 class Recipe(db.Model):
@@ -61,7 +57,7 @@ class Recipe(db.Model):
     ingredients = db.Column(db.String(250), nullable=False)
     date = db.Column(db.TIMESTAMP(timezone=False), nullable=False, default=datetime.datetime.now())
     instructions = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
     img_url = db.Column(db.String(250), nullable=False)
 
 

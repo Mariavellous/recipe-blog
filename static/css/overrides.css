@@ -1,0 +1,6 @@
+#mainNav .navbar-nav > li.nav-item.username .nav-link {
+    font-size: 1em;
+}
+a {
+    transition: none;
+}

@@ -23,6 +23,7 @@
 
     <!-- Custom styles for this template -->
     <link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/overrides.css') }}" rel="stylesheet">
 
 </head>
 
@@ -41,8 +42,9 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 {% if current_user.is_authenticated %}
-                    <h4>Hi, {{ current_user.name }}! </h4>
-
+                    <li class="nav-item username">
+                        <a href="" class="nav-link"> Hi, {{ current_user.name }}!</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/about">About</a>
                     </li>

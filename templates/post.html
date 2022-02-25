@@ -31,7 +31,7 @@
             <p> {{ comment.body }} - {{ comment.user.name }}  on {{ comment.date.strftime("%B %d, %Y") }} </p>
 
             {% endfor %}
-            <form action="/post/{{ post.id}}/comment" method="POST">
+            <form action="/recipes/{{ post.id }}/comment" method="POST">
                 <textarea rows="5" cols="20" name="textarea"></textarea><input type="submit"/>
             </form>
             </p>

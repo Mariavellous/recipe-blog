@@ -91,7 +91,7 @@ def get_all_posts():
     return render_template("index.html", all_posts=posts)
 
 
-@app.route("/recipes/<int:post_id>")
+@app.route("/recipes/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
     post = Recipe.query.get(post_id)
     comments = Comment.query.filter(Comment.recipe_id == post_id).all()
@@ -99,6 +99,7 @@ def show_post(post_id):
     for comment in comments:
         comment.user = User.query.filter(User.id == comment.user_id).first()
     return render_template("post.html", post=post, author=author, comments=comments)
+
 
 @app.route("/recipes/<int:post_id>/comment", methods=["POST"])
 @login_required

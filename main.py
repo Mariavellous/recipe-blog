@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, redirect, url_for, jsonify, request, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm

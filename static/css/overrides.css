@@ -4,3 +4,75 @@
 a {
     transition: none;
 }
+
+.comment-form textarea {
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: sans-serif;
+    color: darkgray;
+}
+
+.btn {
+    border-radius: 5px;
+}
+
+.comments-container {
+    margin-top:50px;
+    margin-bottom: 100px;
+}
+.comments-container ul {
+    margin-bottom: 2em;
+}
+.comments-container ul li {
+    list-style: none;
+    margin-bottom: 20px;
+}
+
+.comment-body {
+    display: block;
+}
+.commenter {
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 5px;
+    padding: 0 7px;
+    font-size: 0.75em;
+    opacity: 0.75;
+}
+.comments-container ul li .date {
+    font-size: 0.75em;
+    opacity: 0.75;
+}
+.login-functions {
+    display: flex;
+    width: 100%;
+}
+.login-functions a.demo-login {
+    box-shadow: 0 0 0 0 rgb(63, 160, 172);
+	transform: scale(1);
+	animation: pulse 2.5s infinite;
+}
+.login-functions a {
+    margin: 0 10px;
+}
+.login-functions a.align-right {
+    margin-left: auto;
+}
+
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(63, 160, 172, 0.7);
+	}
+
+	70% {
+		transform: scale(1);
+		box-shadow: 0 0 0 10px rgba(63, 160, 172, 0);
+	}
+
+	100% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(63, 160, 172, 0);
+	}
+}

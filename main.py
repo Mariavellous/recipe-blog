@@ -190,6 +190,11 @@ def login():
         else:
             return render_template("login.html")
 
+@app.route('/login/demo-user', methods=["GET"])
+def login_demo_user():
+    login_user(User.query.filter(User.email == "demo@example.com").first())
+    return redirect(url_for("get_all_posts"))
+
 # User Logout
 @app.route('/logout')
 def logout():

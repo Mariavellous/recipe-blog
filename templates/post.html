@@ -26,15 +26,22 @@
           <p>
             {{post.instructions|safe}}
           </p>
-            <h3>Comments</h3>
-            {% for comment in comments %}
-            <p> {{ comment.body }} - {{ comment.user.name }}  on {{ comment.date.strftime("%B %d, %Y") }} </p>
-
-            {% endfor %}
-            <form action="/recipes/{{ post.id }}/comment" method="POST">
-                <textarea rows="5" cols="20" name="textarea"></textarea><input type="submit"/>
-            </form>
-            </p>
+            <div class="comments-container">
+                <h3>Comments</h3>
+                <ul>
+                    {% for comment in comments %}
+                        <li class="comment">
+                            <span class="comment-body">{{ comment.body }}</span>
+                            <span class="commenter">{{ comment.user.name }}</span>
+                            <span class="date">{{ comment.date.strftime("%B %d, %Y") }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <form class="comment-form" action="/post/{{ post.id}}/comment" method="POST">
+                    <textarea rows="2" cols="5" name="textarea" placeholder="Did you like the recipe?"></textarea><input type="submit"/>
+                </form>
+                </p>
+         </div>
            <hr>
            <div class="clearfix">
                <a class="btn btn-primary float-left" href="{{url_for('edit_post', post_id=post.id)}}">Edit Post</a>

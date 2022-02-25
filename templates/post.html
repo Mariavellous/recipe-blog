@@ -37,9 +37,12 @@
                         </li>
                     {% endfor %}
                 </ul>
+                    {% if not current_user.is_anonymous %}
+
                 <form class="comment-form" action="/post/{{ post.id}}/comment" method="POST">
                     <textarea rows="2" cols="5" name="textarea" placeholder="Did you like the recipe?"></textarea><input type="submit"/>
                 </form>
+            {% endif %}
                 </p>
          </div>
            <hr>

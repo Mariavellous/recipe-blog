@@ -85,7 +85,7 @@ def make_new_post(form, post_id):
 
 @app.route('/')
 def get_all_posts():
-    posts = Recipe.query.all()
+    posts = Recipe.query.order_by(Recipe.date.desc()).all()
     for post in posts:
         post.user = User.query.filter(User.id == post.user_id).first()
     return render_template("index.html", all_posts=posts)
@@ -94,7 +94,7 @@ def get_all_posts():
 @app.route("/recipes/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
     post = Recipe.query.get(post_id)
-    comments = Comment.query.filter(Comment.recipe_id == post_id).all()
+    comments = Comment.query.filter(Comment.recipe_id == post_id).order_by(Comment.date.desc()).all()
     author = User.query.filter(User.id == post.user_id).first()
     for comment in comments:
         comment.user = User.query.filter(User.id == comment.user_id).first()
@@ -198,7 +198,7 @@ def login():
 @app.route('/login/demo-user', methods=["GET"])
 def login_demo_user():
     login_user(User.query.filter(User.email == "demo@example.com").first())
-    return redirect(url_for("get_all_posts"))
+    return redirect(request.referrer)
 
 # User Logout
 @app.route('/logout')

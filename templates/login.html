@@ -20,6 +20,9 @@
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
         <p>What's cookin' good-lookin'?</p>
+        {% if error %}
+          <p style="color:red; font-size:14px"> {{ error }} </p>
+          {% endif %}
         <form action="{{ url_for('login') }}" method="post" name="sentMessage" id="contactForm" novalidate>
           <div class="control-group">
             <div class="form-group floating-label-form-group controls">
@@ -47,8 +50,5 @@
 
   {% include "footer.html" %}
 
-{#    <form action="{{ url_for('login') }}" method="post">#}
-{#        <input type="text" name="email" placeholder="Email" required="required"/>#}
-{#        <input type="password" name="password" placeholder="Password" required="required"/>#}
-{#    </form>#}
+
 

@@ -181,14 +181,19 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
     else:
+        error = None
         email = request.form.get('email')
         password = str(request.form.get('password'))
         user = User.query.filter(User.email == email).first()
-        if check_password_hash(user.password, password):
+        if user == None:
+            error = "That email does not exist. Please try again."
+            return render_template("login.html", error=error)
+        elif check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for("get_all_posts"))
         else:
-            return render_template("login.html")
+            error = "Incorrect password. Please try again."
+            return render_template("login.html", error=error)
 
 @app.route('/login/demo-user', methods=["GET"])
 def login_demo_user():

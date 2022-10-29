@@ -38,7 +38,7 @@ python3 main.py
 
 ### 5. Play the game
 
-Open [http://127.0.0.1:5008](http://127.0.0.1:5008) in your browser
+Open [http://127.0.0.1:5002](http://127.0.0.1:5002) in your browser
 
 
 ## Thought Process

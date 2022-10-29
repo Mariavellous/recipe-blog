@@ -14,6 +14,11 @@ The `.env` file stores the secret key and database url to protect the database a
 
 Place environment variables inside a file named `.env`
 
+```
+RECIPES_SECRET_KEY=8BYkEfBA6O6donzWlSihBXox7C0sKR6b
+RECIPES_DATABASE_URL=postgresql://melanie:melanie@localhost/recipes
+```
+
 ### 3. Install all necessary requirements.
 
 I used the `flask` framework to develop the web application along with `sqlachemy` to communicate with the database.

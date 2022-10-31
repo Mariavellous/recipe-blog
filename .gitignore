@@ -6,3 +6,4 @@ requirements.txt
 /venv/
 .env
 /scripts
+__pycache__/

@@ -4,7 +4,6 @@ Hungry? https://fave-recipes.herokuapp.com/
 # The Recipe Collection 🥘
 This website has a collection of delicious recipes created by various users. All users can post/share a new recipe for everyone to enjoy. Users can post a comment to a recipe to ask question, provide input and or simply show appreciation. 
 
-
 ## Thought Process
 
 I like to start by thinking about what information needs to be stored in the database.
@@ -26,13 +25,13 @@ Created a `CreatePostForm` class which is a `FlaskForm` that displays a template
 
 ### Created RESTFUL API routes in the server
 
-* `GET` `/` --> shows all recipes posts 
-* `GET` `/recipes/<int:post_id>` --> shows the recipe with the specific post_id 
-* `POST` `/recipes/<int:post_id>/comment` --> creates a comment on a recipe with the specific post_id
-* `POST` `/recipes/new` --> creates a new recipe post 
-* `GET` `POST` `/recipes/<int:post_id>/edit` --> retrieves a recipe with a specific post_id and edit the post  
+* `GET` `/` --> show all recipes posts 
+* `GET` `/recipes/<int:post_id>` --> show the recipe with the specific post_id 
+* `POST` `/recipes/<int:post_id>/comment` --> create a comment on a recipe with the specific post_id
+* `POST` `/recipes/new` --> create a new recipe post 
+* `GET` `POST` `/recipes/<int:post_id>/edit` --> retrieve a recipe with a specific post_id and edit the post  
 * `GET` `/recipes/<int:post_id>/delete` --> delete the recipe with a specific post_id and then displays updated recipe posts 
-* `GET` `/about` --> displays a brief story about me (the creator) and the website 
+* `GET` `/about` --> display a brief story about me (the creator) and the website 
 * `POST` `/register` --> register user
 * `GET` `/login` --> login user
 * `DELETE` `/logout` --> logout user 
@@ -44,7 +43,9 @@ The server then returns a response of all data needed to display in the frontend
 
 ### 1. Database
 
-For the purposes of this demo, a SQLite db file has already been created with sample data in `post.db` or `postgresql://melanie:melanie@localhost/recipes`
+Create a database that includes three different tables: User, Recipe and Comment. 
+
+![Brainstorm Image](/docs/database_brainstorm.jpg)
 
 ### 2. Environment Variables
 
@@ -74,11 +75,9 @@ pip3 intall -r requirements.txt
 python3 main.py
 ```
 
-### 5. Play the game
+### 5. Run the app
 
 Open [http://127.0.0.1:5002](http://127.0.0.1:5002) in your browser
 
 ## TODO
 * Categorize recipes either by type of cuisine or meal type of the day (breakfast, lunch, dinner, dessert, appetizer). 
-
-
